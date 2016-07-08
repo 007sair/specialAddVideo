@@ -1,0 +1,251 @@
+//------------------
+// CSS3
+//------------------
+@import "prefixer";
+
+/**
+ * px to rem
+ * @param  {[number]} $px    		[设计稿的真实尺寸]
+ * @param  {[number]} $base: 75     [设计稿的基数，640的设计稿为40,750的设计稿为75]
+ * @return {[string]}        		[返回的数值]
+ */
+@function rem($px, $base: 75){
+	@if (unitless($px)) {
+		@return $px / $base * 1rem;
+	} @else{
+		@warn "#{$px} has 'px', please remove it";
+		@return $px;
+	}
+}
+
+@mixin font-dpr($font-size){
+    font-size: $font-size;
+
+    [data-dpr="2"] & {
+        font-size: $font-size * 2;  /*no*/
+    }
+
+    [data-dpr="3"] & {
+        font-size: $font-size * 3;  /*px*/
+    }
+}
+
+//css3
+@mixin radius($radius) {
+	@include prefixer(border-radius, $radius);
+}
+
+@mixin shadow($type) {
+	@include prefixer(box-shadow, $type);
+}
+
+@mixin sizing($type){
+	@include prefixer(box-sizing, $type);
+}
+
+@mixin transition($value){
+	@include prefixer(transition, $value);
+}
+
+@mixin rotate($value) {
+	@include prefixer(transform, rotate($value));
+}
+
+@mixin origin($value){
+	@include prefixer(transform-origin, $value);
+}
+
+@mixin scale($value){
+	@include prefixer(transform, scale($value));
+}
+
+@mixin scale3d($value){
+	@include prefixer(transform, scale3d($value));
+}
+
+@mixin translate($value){
+	@include prefixer(transform, translate($value));
+}
+
+@mixin translate3d($value){
+	@include prefixer(transform, translate3d($value));
+}
+
+@mixin linear-gradient($from, $to) {
+    background-color: $to;											//Fallback for sad browsers
+    background-image:-moz-linear-gradient($from, $to);				//Mozilla Firefox
+    background-image:-o-linear-gradient($from, $to);				//Opera
+    background-image:-webkit-gradient(linear, left top, left bottom, color-stop(0, $from), color-stop(1, $to));			//WebKit (Chrome 11+)
+    background-image: -webkit-linear-gradient($from, $to);			//WebKit (Safari 5.1+, Chrome 10+)
+    background-image: -ms-linear-gradient($from, $to);				//IE10
+    background-image: linear-gradient($from, $to);					//W3C
+}
+
+// Background Gradient: Top to Bottom
+@mixin bg-gradient-t2b($start-colour, $end-colour) {
+    background-color: $start-colour;
+    background-image: -webkit-gradient(linear, left top, left bottom, from($start-colour), to($end-colour));
+    background-image: -webkit-linear-gradient(top, $start-colour, $end-colour);
+    background-image: -moz-linear-gradient(top, $start-colour, $end-colour);
+    background-image: -ms-linear-gradient(top, $start-colour, $end-colour);
+    background-image: -o-linear-gradient(top, $start-colour, $end-colour);
+    background-image: linear-gradient(top, $start-colour, $end-colour);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#{ie-hex-str(rgba($start-colour,1))},endColorstr=#{ie-hex-str(rgba($end-colour,1))});
+}
+
+// Background Gradient: Left to Right
+@mixin bg-gradient-l2r($start-colour, $end-colour) {
+    background-color: $start-colour;
+    background-image: -webkit-gradient(linear, left top, right top, from($start-colour), to($end-colour));
+    background-image: -webkit-linear-gradient(left, $start-colour, $end-colour);
+    background-image: -moz-linear-gradient(left, $start-colour, $end-colour);
+    background-image: -ms-linear-gradient(left, $start-colour, $end-colour);
+    background-image: -o-linear-gradient(left, $start-colour, $end-colour);
+    background-image: linear-gradient(left, $start-colour, $end-colour);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#{ie-hex-str(rgba($start-colour,1))}, endColorstr=#{ie-hex-str(rgba($end-colour,1))}, gradientType='1');
+}
+
+
+//垂直居中 绝对定位版 css3
+//@param  {[string]} $direction      [both] 上下左右都设置,[horizontal] 左右居中,[vertical] 上下居中
+@mixin centerTranslate($direction: both) {
+	position: absolute;
+	//横轴和纵轴都居中
+	@if $direction == both {
+		top: 50%;
+		left: 50%;
+		@include prefixer(transform, translate3d(-50%, -50%, 0));
+	}
+	//横轴居中
+	@else if $direction == horizontal {
+		left: 50%;
+		@include prefixer(transform, translate3d(-50%, 0, 0));
+	}
+	//纵轴居中
+	@else if $direction == vertical {
+		top: 50%;
+		@include prefixer(transform, translate3d(0, -50%, 0));
+	}
+}
+
+//弹性布局
+@mixin flexbox{
+	display: -webkit-box;           //OLD - iOS 6-, Safari 3.1-6 //老版本语法: Safari,  iOS, Android browser, older WebKit browsers.
+	display: -moz-box;              //OLD - Firefox 19- (doesn't work very well) //老版本语法: Firefox (buggy) 
+	display: -ms-flexbox;           //TWEENER - IE 10 //混合版本语法: IE 10
+	display: -webkit-flex;          //NEW - Chrome //新版本语法： Chrome 21+
+	display: flex;                  //NEW, Spec - Opera 12.1, Firefox 20+ //新版本语法： Opera 12.1, Firefox 22+
+}
+
+//弹性布局子元素
+@mixin flex($num:1){
+	display: block;					   /*! x5 bug */
+	-webkit-box-flex: $num;            //OLD - iOS 6-, Safari 3.1-6
+	-moz-box-flex: $num;               //OLD - Firefox 19-
+	-webkit-flex: $num;                //Chrome
+	-ms-flex: $num;                    //IE 10
+	flex: $num;                        //NEW, Spec - Opera 12.1, Firefox 20+
+}
+
+//弹性布局的布局方向
+@mixin flex-direc($direction:x) {
+	//水平方向
+	@if ($direction == x) {
+		//09版
+		-webkit-box-orient: horizontal;
+		//12版
+		@include prefixer(flex-direction, row);
+	}
+	//垂直方向
+	@if ($direction == y) {
+		//09版
+		-webkit-box-orient: vertical;
+		//12版
+		@include prefixer(flex-direction, column);
+	}
+}
+
+//弹性布局重拍列顺序
+@mixin flex-order($num){
+	-webkit-box-ordinal-group: $num;		//OLD - iOS 6-, Safari 3.1-6
+	-moz-box-ordinal-group: $num;      	//OLD - Firefox 19-
+	-ms-flex-order: $num;              	//TWEENER - IE 10
+	-webkit-order: $num;               	//NEW - Chrome
+	order: $num;                       	//NEW, Spec - Opera 12.1, Firefox 20+
+}
+
+
+//[center-children flex居中]
+//@param  {[type]} $x: true        [水平方向居中，false时表示不设置]
+//@param  {[type]} $y: true        [垂直方向居中，false时表示不设置]
+@mixin center-children($x: true, $y: true){
+	@include flexbox;
+	//水平居中
+	@if($x != false){
+		//老版本语法
+		-webkit-box-pack: center; 
+		-moz-box-pack: center; 
+		//混合版本语法
+		-ms-flex-pack: center; 
+		//新版本语法
+		-webkit-justify-content: center;
+		justify-content: center;
+	}
+
+	//垂直居中
+	@if($y != false){
+		//老版本语法
+		-webkit-box-align: center; 
+		-moz-box-align: center;
+		//混合版本语法
+		-ms-flex-align: center; 
+		//新版本语法
+		-webkit-align-items: center;
+		align-items: center;
+	}
+}
+
+
+//控制文字行数溢出点点点
+@mixin ellipsis($line: 1, $substract: null) {
+    @if $line == 1 {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    } @else {
+        display: -webkit-box;
+        display:box;
+        -webkit-line-clamp: $line;
+        line-clamp: $line;
+        -webkit-box-orient: vertical;
+        box-orient: vertical;
+        @if $substract{
+			width: 100% - $substract;
+        }
+    }
+    overflow: hidden;
+}
+
+
+//小三角箭头
+//@param  {[type]} $direction [箭头朝向]
+//@param  {[type]} $width     [箭头宽度]
+//@param  {[type]} $color     [箭头背景色]
+@mixin minArrow($direction, $width, $color){
+	width: 0;
+	height: 0;
+	border-width: $width;
+	border-style: solid;
+	@if $direction == top {
+		border-color: transparent transparent $color transparent;
+	}
+	@if $direction == right {
+		border-color: transparent transparent transparent $color;
+	}
+	@if $direction == bottom {
+		border-color: $color transparent transparent transparent;
+	}
+	@if $direction == left {
+		border-color: transparent $color transparent transparent;
+	}
+}
+

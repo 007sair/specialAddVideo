@@ -1,0 +1,46 @@
+//------------------
+// css3 媒体查询
+//------------------
+
+
+@mixin htmlFont($px){
+	html{
+		font-size: $px;
+	}
+}
+
+//根据屏幕尺寸转换字体值!
+@function conver2px($clientWidth) {
+	@return (20 * (($clientWidth+1) / 320));
+}
+
+//213px显示屏样式 LG Optimus One
+//320px显示屏样式 苹果4/4S/5C/5S黑莓Z30
+//360px显示屏样式 索尼Z1
+//384px显示屏样式 黑莓Z10 谷歌 Nexus 6 LG Optimus G
+//399px显示屏样式 三星galaxyNote
+//414px显示屏样式 苹果6plus
+//424px显示屏样式 LG 4X
+//480px显示屏样式 索尼MT27i Xperia sola
+//640px显示屏样式 摩托罗拉Droid3/4/Razr Atrix 4g
+//640px显示屏样式
+//640px以上显示屏样式
+$screens : 212px, 319px, 359px, 383px, 399px, 414px, 423px, 479px, 539px, 639px, 640px;
+@each $width in $screens {
+	@media screen and ( min-width: $width){
+		@include htmlFont(conver2px($width));
+	}
+}
+
+@media only screen and (min-device-width : 320px) and (max-device-width : 568px){
+	//兼容iphone5
+	@include htmlFont(20px);
+}
+@media (device-width:375px) and (-webkit-min-device-pixel-ratio:2){
+	//兼容iphone 6
+	@include htmlFont(23.4375px);
+}
+//兼容iphone6 plus
+@media (device-width:414px) and (-webkit-min-device-pixel-ratio:3.0){
+	@include htmlFont(25.875px);
+}

@@ -1,0 +1,154 @@
+//------------------
+// mixin
+//------------------
+@import "prefixer";
+
+//清除浮动
+@mixin clearfix($legacy-support-for-ie: true) {
+    @if $legacy-support-for-ie {
+        *zoom: 1;
+    }
+    &:before,&:after {
+        content: "";
+        display: table;
+    }
+    &:after {
+        clear: both;
+        overflow: hidden;
+    }
+}
+%clearfix {
+    @include clearfix;
+}
+
+//渐变效果
+//@param  {[float]} $opacity      		 	[opacity] 0-1的小数
+//@param  {[boolean]} $support-for-ie       [true] 支持IE8-,[false] 不支持IE8-
+@mixin opacity($opacity:.65, $support-for-ie:true) {
+	opacity: $opacity;
+	@if $support-for-ie{
+		$opacity-ie: $opacity * 100;
+		filter: alpha(opacity=$opacity-ie); //IE8
+	}
+}
+
+
+//背景半透明
+//@param  {#HEX  } $color               		十六进制的色值，如：#aabbcc
+//@param  {number} $opacity             		0-1的小数
+//@param  {boolean} $support-for-ie:true 		如果为真，支持ie
+@mixin rgba($color, $opacity, $support-for-ie:true){
+	background-color:rgba($color,$opacity);
+	@if $support-for-ie{
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#{ie-hex-str(rgba($color,$opacity))},endColorstr=#{ie-hex-str(rgba($color,$opacity))});
+		:root & {
+			filter: none;
+		}
+	}
+}
+
+//[center 居中]
+//@param  {[number]} $width  		[居中元素的宽度]
+//@param  {[number]} $height		[居中元素的高度]
+@mixin center($width: null, $height: null) {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+
+	@if not $width and not $height {
+		@include translate((-50%, -50%));
+	} @else if $width and $height {
+		width: $width;
+		height: $height;
+		margin: {
+			top: -($width / 2);
+			left: -($height / 2 );
+		}
+	} @else if not $height {
+		width: $width;
+		margin-left: -($width / 2);
+		@include prefixer(transform, translateY(-50%));
+	} @else {
+		height: $height;
+		margin-top: -($height / 2);
+		@include prefixer(transform, translateX(-50%));
+	}
+}
+
+
+//float 
+@mixin float($direction: left,$support-for-ie:false){
+	float: unquote($direction);
+	@if $support-for-ie{
+		_display: inline;
+	}
+}
+
+//inline-block
+@mixin inline-block($alignment: middle, $support-for-ie: false) {
+	display: inline-block;
+	@if $alignment and $alignment != none {
+		vertical-align: $alignment;
+	}
+	@if $support-for-ie {
+//		*vertical-align: auto;
+		*display: inline;
+		*zoom: 1;
+	}
+}
+
+//最小宽、高
+@mixin minBlock($type, $num){
+	@if ($type == width or $type == both ){
+		min-width: $num;
+		width: auto !important; 
+		_width: $num;
+	}
+	@if ($type == height or $type == both){
+		min-height: $num;
+		height: auto !important; 
+		_height: $num;
+	}
+}
+
+//input等输入框的默认样式重置
+@mixin placeholder($color){
+	&::-webkit-input-placeholder { 
+		color: $color; 
+	} 
+	&:-moz-placeholder { 
+		color: $color;
+	} 
+	&::-moz-placeholder { 
+		color: $color;
+	}
+	&:-ms-input-placeholder { 
+		color: $color; 
+	}
+}
+
+
+//半透明阴影
+//@param  {[number]} $zIndex: 1000  [z轴的高度]
+@mixin mask($zIndex: 1000){
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: $zIndex;
+}
+
+
+//H5背景图设置
+//@param  {[string]} $url       	[图片路径，带引号]
+//@param  {[value]}  $size      	[background-size的值，可以带空格]
+//@param  {[value]}  $else:null 	[可不填，background的其他值]
+@mixin bgSize($url, $size, $else:null){
+	@if not $else{
+		background: url(unquote($url)); 
+	} @else{
+		background: url(unquote($url)) $else; 
+	}
+	@include prefixer(background-size, $size);
+}

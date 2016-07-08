@@ -1,0 +1,65 @@
+//------------------
+// Animat
+//------------------
+@import "prefixer";
+
+
+//**
+//* 动画名称
+//* $name 为keyframes对应的名称
+//*
+@mixin an-name($name){
+	@include prefixer(animation-name, $name);
+}
+
+//**
+//* 动画持续时间
+//* $val 以秒为单位
+//*
+@mixin an-duration($val){
+	@include prefixer(animation-duration, $val);
+}
+
+//**
+//* 动画播放方式
+//* $val
+//* [ease]          	默认值，逐渐变慢
+//* [linear] 			匀速
+//* [ease-in] 			加速
+//* [ease-out] 			减速
+//* [ease-in-out] 		加速再减速
+//* [cubic-bezier] 		自定义
+//*
+@mixin an-function($val){
+	@include prefixer(animation-timing-function, $val);
+}
+
+//**
+//* 动画开始时间 延迟
+//* $val 以秒为单位
+//*
+@mixin an-delay($val){
+	@include prefixer(animation-delay, $val);
+}
+
+//**
+//* 动画循环次数
+//* $val
+//  [1] 			循环一次
+//  [infinite]  	无限循环
+//*
+@mixin an-count($val){
+	@include prefixer(animation-iteration-count, $val);
+}
+
+//**
+//* 动画状态
+//* $val
+//* [none]			默认值。不设置对象动画之外的状态
+//* [forwards]		设置对象状态为动画结束时的状态
+//* [backwards]	设置对象状态为动画开始时的状态
+//* [both]			设置对象状态为动画结束或开始的状态
+//*
+@mixin an-fillmode($val){
+	@include prefixer(animation-fill-mode, $val);
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="format-detection"content="telephone=no, email=no" />
+<title>Examples</title>
+<link rel="stylesheet" href="css/css.css">
+</head>
+<body>
+
+<div class="hideBlock">
+
+	<div id="d1">
+		<a href="javascript:;" id="btnAddVideoList">+新增视频</a>
+		<ul class="datas">
+			
+		</ul>
+	</div>
+
+	<div id="d2">
+		<div class="videoform">
+			<ul>
+				<li>视频名称：<input type="text" class="f-name" id="videoName"> </li>
+				<li>
+					视频代码：<textarea name="" cols="50" rows="7" class="f-code" id="videoCode"></textarea>
+				</li>
+				<li>视频位置：
+					<label data-name="分类顶部" for="videoType1"><input type="radio" class="f-radio" name="videoType" id="videoType1" value="1" checked>分类顶部</label>
+					<label data-name="标题下方" for="videoType2"><input type="radio" class="f-radio" name="videoType" id="videoType2" value="2">标题下方</label>
+					<label data-name="分类底部" for="videoType3"><input type="radio" class="f-radio" name="videoType" id="videoType3" value="3">分类底部</label>
+				</li>
+			</ul>
+		</div>		
+	</div>
+
+</div>
+
+
+<input type="button" value="添加视频1" class="btnAddVideo" data-listid="1000"> <br>
+
+<input type="button" value="添加视频2" class="btnAddVideo" data-listid="1001"> <br>
+
+<input type="button" value="添加视频3" class="btnAddVideo" data-listid="1002">
+
+
+
+<pre id="result"></pre>
+
+<script src="lib/jquery-1.10.2.js"></script>
+<script src="src/dialog.js"></script>
+<script src="src/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+//======================
+// Common
+//======================
+.fl{ float: left;}
+.fr{ float: right;}
+
+.clearfix{
+	@include clearfix;
+}

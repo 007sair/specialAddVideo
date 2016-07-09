@@ -1,7 +1,52 @@
-$(function(){
+$(function() {
 
 	var id,
-		baseTree = {};
+		baseTree = {
+			"1000": {
+				"1468028955456": {
+					"name": "111111",
+					"code": "1",
+					"type": "1"
+				},
+				"1468028966102": {
+					"name": "222222222",
+					"code": "1",
+					"type": "1"
+				},
+				"1468028969572": {
+					"name": "11111111",
+					"code": "1",
+					"type": "2"
+				},
+				"1468028974779": {
+					"name": "222222222",
+					"code": "1",
+					"type": "2"
+				},
+				"1468028985708": {
+					"name": "1111111111",
+					"code": "1",
+					"type": "3"
+				},
+				"1468028990846": {
+					"name": "222222",
+					"code": "1",
+					"type": "3"
+				}
+			},
+			"1001": {
+				"1468029214695": {
+					"name": "aaa",
+					"code": "1",
+					"type": "3"
+				},
+				"1468029220959": {
+					"name": "bbb",
+					"code": "1",
+					"type": "2"
+				}
+			}
+		};
 
 	var $context = $('#d2'),
 		$name = $context.find('#videoName'),
@@ -11,6 +56,8 @@ $(function(){
 		iRadio = 1,
 		listID;
 
+	var flags = {};
+
 	//弹层1
 	var d1 = dialog({
 		id: 'd1',
@@ -18,12 +65,12 @@ $(function(){
 		width: 400,
 		height: 400,
 		okValue: '保存',
-		ok: function(){
+		ok: function() {
 			this.close();
 			showResult();
 			return false;
 		},
-		cancel: function(){
+		cancel: function() {
 			this.close();
 			return false;
 		},
@@ -36,11 +83,12 @@ $(function(){
 		title: '添加视频 step2',
 		okValue: '保存',
 		ok: function() {
-			var isSave = initData();
-			if (isSave) {
+			update();
+			if (match_d2_value()){
+				renderAll(baseTree[listID]);
 				this.close();
 				set_d2_value(null);
-			};
+			}
 			return false;
 		},
 		cancel: function() {
@@ -55,16 +103,11 @@ $(function(){
 	$('.btnAddVideo').on('click', function() {
 		listID = $(this).data('listid');
 		if ($.isEmptyObject(baseTree[listID])) {
-			//初始成一个对象
 			baseTree[listID] = {};
 		}
-		$('.datas').empty();
-		var html = '';
-		for (var key in baseTree[listID]) {
-			html += '<li data-id="' + key + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + baseTree[listID][key].name + '" class="name">' + baseTree[listID][key].name + '</span></li>';
-		}
-		$('.datas').append(html)
+		renderAll(baseTree[listID])
 		d1.showModal();
+		console.log(baseTree[listID])
 	});
 
 	//唤起弹层2
@@ -77,7 +120,6 @@ $(function(){
 	$('.datas').on('click', '.edit', function() {
 		var $li = $(this).parent('li'),
 			_id = $li.data('id');
-
 		id = _id;
 		set_d2_value(baseTree[listID][id]);
 		d2.showModal();
@@ -91,8 +133,8 @@ $(function(){
 		dialog({
 			title: '警告',
 			width: 220,
-			content: '确认要删除<b>'+ name +'</b>吗？',
-			ok: function(){
+			content: '确认要删除<b>' + name + '</b>吗？',
+			ok: function() {
 				$li.remove();
 				delete baseTree[listID][id];
 			}
@@ -104,14 +146,47 @@ $(function(){
 		iRadio = $(this).val();
 	});
 
-	var oHave = {};
+	function update() { //更新每一条li的数据
+		$checked = $('input[name="videoType"]:checked');
+		baseTree[listID][id] = {
+			name: $name.val(),
+			code: $code.val(),
+			type: $checked.val()
+		};
+		iRadio = baseTree[listID][id].type;
+	}
+
+	//渲染前先清空flag
+	function renderLi(obj, key) { // obj = baseTree[listID][id]
+		var $li = $('<li data-id="' + key + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + obj.name + '" class="name">' + obj.name + '</span></li>');
+		var title = $type.eq(obj.type - 1).parent().data('name');
+
+		if (!flags[obj.type]) { //说明是第一次插入
+			var $datas = $('.datas'),
+				$area = $('<div class="area area' + obj.type + '">').appendTo($datas),
+				$ul = $('<ul>').appendTo($area),
+				$title = $('<h3>' + title + '</h3>').prependTo($area);
+
+			flags[obj.type] = true;
+		}
+		$('.area' + obj.type).find('ul').append($li)
+	}
+
+	function renderAll(obj) { // obj = baseTree[listID]
+		flags = {};
+		$('.datas').empty();
+		for (var key in obj) {
+			renderLi(obj[key], key)
+		}
+	}
 
 	//保存第二个弹层的数据
-	function initData(){
+
+	function initData() {
 
 		$checked = $('input[name="videoType"]:checked');
 
-		function updateData () {
+		function updateData() {
 			//设置虚拟data
 			baseTree[listID][id] = {
 				name: $name.val(),
@@ -122,7 +197,7 @@ $(function(){
 		}
 
 		if (match_d2_value()) {
-			if (!baseTree[listID][id]) {	//如果baseTree[listID]里没有这个id，就新增，否则编辑
+			if (!baseTree[listID][id]) { //如果baseTree[listID]里没有这个id，就新增，否则编辑
 				updateData();
 				// if (!oHave[iRadio]) { //第一次
 				// 	var $item = $('<div class="item item'+ iRadio +'" data-type="'+ iRadio +'">').appendTo($('.datas'));
@@ -131,11 +206,11 @@ $(function(){
 				// 	oHave[iRadio] = iRadio;
 				// };
 				// $('.item'+iRadio).find('ul').append('<li data-id="' + id + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + $name.val() + '" class="name">' + $name.val() + '</span></li>');
-				var html = '<li data-id="' + id + '"><p>'+ $checked.parent().data('name') +'</p><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + $name.val() + '" class="name">' + $name.val() + '</span></li>';
+				var html = '<li data-id="' + id + '"><p>' + $checked.parent().data('name') + '</p><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + $name.val() + '" class="name">' + $name.val() + '</span></li>';
 				$('.datas').append(html)
 			} else {
 				updateData();
-				var $li = $('li[data-id="'+ id +'"]');
+				var $li = $('li[data-id="' + id + '"]');
 				$li.find('.name').text($name.val());
 				$li.find('p').text($checked.parent().data('name'))
 			}
@@ -151,29 +226,27 @@ $(function(){
 
 
 	//校验step2的value
-	function match_d2_value(){
-		if ($name.val() == '') {
+
+	function match_d2_value() {
+		if ($name.val() === '') {
 			alert('请填写视频名称')
 			return false;
 		};
-		if ($code.val() == '') {
+		if ($code.val() === '') {
 			alert('请填写视频代码')
-			return false;
-		};
-		if (!$type.val()) {
-			alert('请选择视频位置')
 			return false;
 		};
 		return true;
 	}
 
 	//设置step2的value
-	function set_d2_value(data){
+
+	function set_d2_value(data) {
 		if (data) {
 			$name.val(data.name);
 			$code.val(data.code);
 			$type.eq(data.type - 1).prop('checked', true);
-		}else{
+		} else {
 			$name.val('');
 			$code.val('');
 			$type.eq(0).prop('checked', true);
@@ -184,11 +257,12 @@ $(function(){
 	/**
 	 * 下面所有代码只是为了展示最后的数据，实际应用可以去掉
 	 */
-	function showResult(){
+
+	function showResult() {
 		$('#result').html(format(JSON.stringify(baseTree), false))
 	}
 
-	function format(txt, compress ) { /* 格式化JSON源码(对象转换为JSON文本) */
+	function format(txt, compress) { /* 格式化JSON源码(对象转换为JSON文本) */
 		var indentChar = '    ';
 		if (/^\s*$/.test(txt)) {
 			alert('数据为空,无法格式化! ');
@@ -207,7 +281,7 @@ $(function(){
 			nodeCount = 0,
 			maxDepth = 0;
 
-		var notify = function(name, value, isLast, indent , formObj) {
+		var notify = function(name, value, isLast, indent, formObj) {
 			nodeCount++; /*节点计数*/
 			for (var i = 0, tab = ''; i < indent; i++) tab += indentChar; /* 缩进HTML */
 			tab = compress ? '' : tab; /*压缩模式忽略缩进*/

@@ -4,34 +4,46 @@ $(function() {
 		baseTree = {
 			"1000": {
 				"1468028955456": {
-					"name": "111111",
+					"name": "分类1",
 					"code": "1",
-					"type": "1"
+					"type": "1",
+					"index": 21
 				},
 				"1468028966102": {
-					"name": "222222222",
+					"name": "分类2",
 					"code": "1",
-					"type": "1"
+					"type": "1",
+					"index": 22
 				},
 				"1468028969572": {
-					"name": "11111111",
+					"name": "标题1",
 					"code": "1",
-					"type": "2"
+					"type": "2",
+					"index": 14
 				},
 				"1468028974779": {
-					"name": "222222222",
+					"name": "标题2",
 					"code": "1",
-					"type": "2"
+					"type": "2",
+					"index": 15
 				},
 				"1468028985708": {
-					"name": "1111111111",
+					"name": "底部1",
 					"code": "1",
-					"type": "3"
+					"type": "3",
+					"index": 14
 				},
 				"1468028990846": {
-					"name": "222222",
+					"name": "底部2",
 					"code": "1",
-					"type": "3"
+					"type": "3",
+					"index": 15
+				},
+				"1468073132243": {
+					"name": "分类3",
+					"code": "1",
+					"type": "1",
+					"index": 23
 				}
 			},
 			"1001": {
@@ -54,9 +66,12 @@ $(function() {
 		$type = $context.find('input[name="videoType"]'),
 		$checked,
 		iRadio = 1,
-		listID;
+		listID,
+		max = $type.length;
 
 	var flags = {};
+	var oIndexs = {};
+
 
 	//弹层1
 	var d1 = dialog({
@@ -93,6 +108,7 @@ $(function() {
 		},
 		cancel: function() {
 			this.close();
+			set_d2_value(null);
 			return false;
 		},
 		cancelDisplay: false,
@@ -137,6 +153,7 @@ $(function() {
 			ok: function() {
 				$li.remove();
 				delete baseTree[listID][id];
+				renderAll(baseTree[listID]);
 			}
 		}).showModal();
 	});
@@ -151,14 +168,16 @@ $(function() {
 		baseTree[listID][id] = {
 			name: $name.val(),
 			code: $code.val(),
-			type: $checked.val()
+			type: $checked.val(),
+			index: 0
 		};
 		iRadio = baseTree[listID][id].type;
 	}
 
-	//渲染前先清空flag
+
 	function renderLi(obj, key) { // obj = baseTree[listID][id]
-		var $li = $('<li data-id="' + key + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + obj.name + '" class="name">' + obj.name + '</span></li>');
+		var index = oIndexs[obj.type]++;
+		var $li = $('<li data-id="' + key + '" data-type="'+ obj.type +'" data-index="'+ index +'"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + obj.name + '" class="name">' + obj.name + '</span></li>');
 		var title = $type.eq(obj.type - 1).parent().data('name');
 
 		if (!flags[obj.type]) { //说明是第一次插入
@@ -169,64 +188,25 @@ $(function() {
 
 			flags[obj.type] = true;
 		}
-		$('.area' + obj.type).find('ul').append($li)
+		obj.index = index;
+		$('.area' + obj.type).find('ul').append($li);
 	}
 
 	function renderAll(obj) { // obj = baseTree[listID]
-		flags = {};
+		//重置排序下标
+		for (var i = 0; i < max; i++) {
+			oIndexs[i + 1] = 0;
+		};
+		flags = {};	//重置是否第一次插入对象
 		$('.datas').empty();
 		for (var key in obj) {
 			renderLi(obj[key], key)
 		}
 	}
 
-	//保存第二个弹层的数据
-
-	function initData() {
-
-		$checked = $('input[name="videoType"]:checked');
-
-		function updateData() {
-			//设置虚拟data
-			baseTree[listID][id] = {
-				name: $name.val(),
-				code: $code.val(),
-				type: $checked.val()
-			};
-			iRadio = baseTree[listID][id].type;
-		}
-
-		if (match_d2_value()) {
-			if (!baseTree[listID][id]) { //如果baseTree[listID]里没有这个id，就新增，否则编辑
-				updateData();
-				// if (!oHave[iRadio]) { //第一次
-				// 	var $item = $('<div class="item item'+ iRadio +'" data-type="'+ iRadio +'">').appendTo($('.datas'));
-				// 	var $ul = $('<ul></ul>').appendTo($item);
-				// 	var $h3 = $('<h3>'+ $checked.parent().data('name') +'</h3>').prependTo($item);
-				// 	oHave[iRadio] = iRadio;
-				// };
-				// $('.item'+iRadio).find('ul').append('<li data-id="' + id + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + $name.val() + '" class="name">' + $name.val() + '</span></li>');
-				var html = '<li data-id="' + id + '"><p>' + $checked.parent().data('name') + '</p><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + $name.val() + '" class="name">' + $name.val() + '</span></li>';
-				$('.datas').append(html)
-			} else {
-				updateData();
-				var $li = $('li[data-id="' + id + '"]');
-				$li.find('.name').text($name.val());
-				$li.find('p').text($checked.parent().data('name'))
-			}
-
-			console.log(iRadio)
-
-			return true;
-		}
-
-		return false;
-
-	}
-
+	
 
 	//校验step2的value
-
 	function match_d2_value() {
 		if ($name.val() === '') {
 			alert('请填写视频名称')
@@ -240,7 +220,6 @@ $(function() {
 	}
 
 	//设置step2的value
-
 	function set_d2_value(data) {
 		if (data) {
 			$name.val(data.name);
@@ -252,6 +231,20 @@ $(function() {
 			$type.eq(0).prop('checked', true);
 		}
 	}
+
+
+	//注意，删除数据后data-index不会按照顺序排列 会出现1 2 4的排列，除非重新渲染
+	function sortData(){
+		var curIndex = $(".f-select").val();
+		var curData = baseTree[listID][id];
+		console.log(curData)
+		if (curIndex == 1) { //上移
+			if (curData.index == 0) {
+				return false;
+			};
+		};
+	}
+
 
 
 	/**

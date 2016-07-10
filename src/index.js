@@ -1,77 +1,46 @@
 $(function() {
 
-	var id,
-		baseTree = {
-			"1000": {
-				"1468028955456": {
-					"name": "分类1",
-					"code": "1",
-					"type": "1",
-					"index": 21
+	var baseTree = {
+		'1000': {
+			1: [
+				{
+					id: 'a11111',
+					name: '111111',
+					code: '1'
 				},
-				"1468028966102": {
-					"name": "分类2",
-					"code": "2",
-					"type": "1",
-					"index": 22
-				},
-				"1468028969572": {
-					"name": "标题1",
-					"code": "1",
-					"type": "2",
-					"index": 14
-				},
-				"1468028974779": {
-					"name": "标题2",
-					"code": "2",
-					"type": "2",
-					"index": 15
-				},
-				"1468028985708": {
-					"name": "底部1",
-					"code": "1",
-					"type": "3",
-					"index": 14
-				},
-				"1468028990846": {
-					"name": "底部2",
-					"code": "2",
-					"type": "3",
-					"index": 15
-				},
-				"1468073132243": {
-					"name": "分类3",
-					"code": "3",
-					"type": "1",
-					"index": 23
+				{
+					id: 'b222222',
+					name: '222222222',
+					code: '2'
 				}
-			},
-			"1001": {
-				"1468029214695": {
-					"name": "aaa",
-					"code": "1",
-					"type": "3"
-				},
-				"1468029220959": {
-					"name": "bbb",
-					"code": "1",
-					"type": "2"
+			],
+			2: [
+				{
+					id: 'c11111',
+					name: '33333333',
+					code: '1'
 				}
-			}
-		};
+			]
+		}
+	};
 
+	//dom var
 	var $context = $('#d2'),
 		$name = $context.find('#videoName'),
 		$code = $context.find('#videoCode'),
 		$type = $context.find('input[name="videoType"]'),
-		$selector = $(".f-select"),
 		$checked,
-		iRadio = 1,
+		$selector = $(".f-select"),
+		$datas = $('.datas'),
+		$typeTitle = $('.typeTittle');
+
+	var	iRadio = 1,
 		listID,
 		max = $type.length;
 
 	var flags = {};
 	var oIndexs = {};
+
 
 
 	//弹层1
@@ -100,8 +69,8 @@ $(function() {
 		okValue: '保存',
 		ok: function() {
 			if (matchValue()){
-				updateData();
-				renderAll(baseTree[listID]);
+				update();
+				render(baseTree[listID]);
 				this.close();
 				setValue(null);
 			}
@@ -115,6 +84,115 @@ $(function() {
 		cancelDisplay: false,
 		content: document.getElementById('d2')
 	});
+
+
+	$('.btnAddVideo').on('click', function() {
+		listID = $(this).data('listid');
+		if ($.isEmptyObject(baseTree[listID])) {
+			baseTree[listID] = {};
+		}
+		render(baseTree[listID]);
+		d1.showModal();
+	});
+
+
+	//新增
+	$('#btnAddVideoList').on('click', function() {
+		$('.f-li-select').hide();
+		d2.showModal();
+	});
+
+
+	//编辑
+	$('.datas').on('click', '.edit', function() {
+		$('.f-li-select').show();
+		var $li = $(this).parent('li'),
+			index = $li.index(),
+			type = $li.data('type');
+		setValue(baseTree[listID][type][index]);
+		d2.showModal();
+	});
+
+
+	function update(){
+		var data = {
+			id: +new Date(),
+			name: $name.val(),
+			code: $code.val(),
+			type: $('input[name="videoType"]:checked').val()
+		};
+		if (!isArray(baseTree[listID][data.type])) {
+			baseTree[listID][data.type] = [];
+		};
+		baseTree[listID][data.type].push(data);
+	}
+
+	function render(obj) { // obj = baseTree[listID]
+		//reset
+		$datas.empty();
+		flags = {};
+		for (var key in obj) { // 1:{}, 2:{}, 3:{}
+			var arr = obj[key],
+				type = +key;
+
+			var $area, $ul, $h3, sLi = '';
+
+			if (!flags[type]) { //说明是第一次插入
+				$area = $('<div class="area area' + type + '">').appendTo($datas),
+				$ul = $('<ul>').appendTo($area),
+				$h3 = $('<h3>' + $typeTitle.eq(type - 1).data('name') + '</h3>').prependTo($area);
+
+				flags[type] = true;
+			}
+
+			if (arr.length) {
+				for (var i = 0; i < arr.length; i++) {
+					sLi += '<li data-id="' + arr[i].id + '" data-type="'+ type +'"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>'; 
+				};
+				$ul.append(sLi);
+			}
+
+		}
+	}
+
+
+	//校验step2的value
+	function matchValue() {
+		if ($name.val() === '') {
+			alert('请填写视频名称')
+			return false;
+		};
+		if ($code.val() === '') {
+			alert('请填写视频代码')
+			return false;
+		};
+		return true;
+	}
+
+
+	//设置step2的value
+	function setValue(data) {
+		if (data) {
+			$name.val(data.name);
+			$code.val(data.code);
+			$type.eq(data.type - 1).prop('checked', true);
+		} else {
+			$name.val('');
+			$code.val('');
+			$type.eq(0).prop('checked', true);
+			$selector.val(0)
+		}
+	}
+
+	function isArray(object) {
+		return object && typeof object === 'object' &&
+			typeof object.length === 'number' &&
+			typeof object.splice === 'function' &&
+			!(object.propertyIsEnumerable('length'));
+	}
+
+
+	/*
 
 	//唤起弹层1
 	$('.btnAddVideo').on('click', function() {
@@ -271,6 +349,7 @@ $(function() {
 			};
 		}
 	}
+	*/
 
 
 

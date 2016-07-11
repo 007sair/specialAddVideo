@@ -5,32 +5,27 @@ $(function() {
 			"1": [{
 					"name": "顶部1",
 					"code": "1",
-					"type": "1",
-					"id": "a11111"
+					"type": "1"
 				}
 			],
 			"2": [{
 					"name": "标题1",
 					"code": "1",
-					"type": "2",
-					"id": "undefined"
+					"type": "2"
 				}, {
 					"name": "标题2",
 					"code": "2",
-					"type": "2",
-					"id": "undefined"
+					"type": "2"
 				}
 			],
 			"3": [{
 					"name": "底部1",
 					"code": "1",
-					"type": "3",
-					"id": "c11111"
+					"type": "3"
 				}, {
 					"name": "底部2",
 					"code": "2",
-					"type": "3",
-					"id": "b222222"
+					"type": "3"
 				}
 			]
 		}
@@ -41,22 +36,17 @@ $(function() {
 		$name = $context.find('#videoName'),
 		$code = $context.find('#videoCode'),
 		$type = $context.find('input[name="videoType"]'),
-		$checked,
 		$selector = $(".f-select"),
 		$datas = $('.datas'),
 		$typeTitle = $('.typeTittle');
 
 	var	_id,
 		_index = -1,
-		_type,
+		_type = 1,
 		_radio = 1,
 		listID,
-		max = $type.length;
-
-	var flags = {};
-	var oIndexs = {};
-
-
+		max = $type.length,
+		flags = {};
 
 	//弹层1
 	var d1 = dialog({
@@ -67,6 +57,7 @@ $(function() {
 		okValue: '保存',
 		ok: function() {
 			this.close();
+			addSort();
 			showResult();
 			return false;
 		},
@@ -108,26 +99,27 @@ $(function() {
 			type: $('input[name="videoType"]:checked').val()
 		};
 
-		if (!isArray(baseTree[listID][data.type])) {
-			baseTree[listID][data.type] = [];
-		};
+		var obj = baseTree[listID];
 
 		if (_index < 0) { //新增
-			// data.id = +new Date();
-			baseTree[listID][data.type].push(data);
-			sort(baseTree[listID][data.type], baseTree[listID][data.type].length - 1)
+			if (!isArray(obj[data.type])) {
+				obj[data.type] = [];
+			};
+			data.id = 'id_' + (+new Date()); //和下面的一起放开使用
+			obj[data.type].push(data);
+			sort(obj[data.type], obj[data.type].length - 1)
 		} else { //编辑
-			// data.id = _id;
+			data.id = _id; //需定义
 			var lastIndex = ''; //被编辑的元素在更新数据后的位置
 			if (+_type !== +_radio) { //是否有更新radio
-				baseTree[listID][_type].splice(_index, 1);
-				baseTree[listID][_radio].push(data);
-				lastIndex = baseTree[listID][_radio].length - 1;
+				obj[_type].splice(_index, 1);
+				obj[_radio].push(data);
+				lastIndex = obj[_radio].length - 1;
 			} else {
-				baseTree[listID][_radio][_index] = data;
+				obj[_radio][_index] = data;
 				lastIndex = _index;
 			}
-			sort(baseTree[listID][_radio], lastIndex)
+			sort(obj[_radio], lastIndex)
 		}
 	}
 
@@ -149,11 +141,14 @@ $(function() {
 		};
 	}
 
-
-	function swipe(arr, index1, index2) {
-		arr[index1] = arr.splice(index2, 1, arr[index1])[0];
-		return arr;
-	};
+	function addSort(){
+		for(var key in baseTree[listID]){
+			var arr = baseTree[listID][key];
+			for (var i = 0; i < arr.length; i++) {
+				arr[i].sort = i;
+			};
+		}
+	}
 
 
 	function render(obj) { // obj = baseTree[listID]
@@ -176,15 +171,17 @@ $(function() {
 
 			if (arr.length) {
 				for (var i = 0; i < arr.length; i++) {
-					sLi += '<li data-type="' + type + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>';
+					arr[i].id = arr[i].id || '';
+					sLi += '<li data-type="' + type + '" data-id="'+ arr[i].id +'"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>';
 				};
 				$ul.append(sLi);
 				$area.appendTo($datas);
+			}else{ //空数组时删除这个对象
+				delete obj[key];
 			}
 
 		}
 	}
-
 
 	//校验step2的value
 	function matchValue() {
@@ -198,7 +195,6 @@ $(function() {
 		};
 		return true;
 	}
-
 
 	//设置step2的value
 	function setValue(data) {
@@ -214,6 +210,11 @@ $(function() {
 			_index = -1;
 		}
 	}
+
+	function swipe(arr, index1, index2) {
+		arr[index1] = arr.splice(index2, 1, arr[index1])[0];
+		return arr;
+	};
 
 	function isArray(object) {
 		return object && typeof object === 'object' &&
@@ -232,24 +233,21 @@ $(function() {
 		d1.showModal();
 	});
 
-
 	//新增
 	$('#btnAddVideoList').on('click', function() {
 		d2.showModal();
 	});
 
-
 	//编辑
 	$('.datas').on('click', '.edit', function() {
 		var $li = $(this).parent('li');
 		_type = $li.data('type');
-		_id = $li.data('id');
 		_index = $li.index();
+		_id = $li.data('id');
 		_radio = _type;
 		setValue(baseTree[listID][_type][_index]);
 		d2.showModal();
 	});
-
 
 	//删除
 	$('.datas').on('click', '.del', function() {
@@ -274,171 +272,10 @@ $(function() {
 	});
 
 
-	/*
-
-	//唤起弹层1
-	$('.btnAddVideo').on('click', function() {
-		listID = $(this).data('listid');
-		if ($.isEmptyObject(baseTree[listID])) {
-			baseTree[listID] = {};
-		}
-		renderAll(baseTree[listID])
-		d1.showModal();
-	});
-
-	//新增
-	$('#btnAddVideoList').on('click', function() {
-		$('.f-li-select').hide();
-		id = +new Date();
-		baseTree[listID][id] = {};
-		d2.showModal();
-	});
-
-	//编辑
-	$('.datas').on('click', '.edit', function() {
-		$('.f-li-select').show();
-		var $li = $(this).parent('li');
-		id = $li.data('id');
-		setValue(baseTree[listID][id]);
-		d2.showModal();
-	});
-
-	//删除
-	$('.datas').on('click', '.del', function() {
-		var $li = $(this).parent('li'),
-			id = $li.data('id'),
-			name = $(this).siblings('.name').text();
-		dialog({
-			title: '警告',
-			width: 220,
-			content: '确认要删除<b>' + name + '</b>吗？',
-			ok: function() {
-				$li.remove();
-				delete baseTree[listID][id];
-				renderAll(baseTree[listID]);
-			}
-		}).showModal();
-	});
-
-
-	$('input[name="videoType"]').on('change', function() {
-		_radio = $(this).val();
-	});
-
-
-
-	function renderLi(obj, key) { // obj = baseTree[listID][id]
-		var $li = $('<li data-id="' + key + '" data-type="'+ obj.type +'" data-index="'+ obj.index +'"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + obj.name + '" class="name">' + obj.name + '</span></li>');
-		var title = $type.eq(obj.type - 1).parent().data('name');
-
-		if (!flags[obj.type]) { //说明是第一次插入
-			var $datas = $('.datas'),
-				$area = $('<div class="area area' + obj.type + '">').appendTo($datas),
-				$ul = $('<ul>').appendTo($area),
-				$title = $('<h3>' + title + '</h3>').prependTo($area);
-
-			flags[obj.type] = true;
-		}
-		$('.area' + obj.type).find('ul').append($li);
-	}
-
-	function renderAll(obj) { // obj = baseTree[listID]
-		//重置每种位置的下标 保证循环时都从0开始
-		for (var i = 0; i < max; i++) {
-			oIndexs[i + 1] = 0;
-		};
-		flags = {};	//重置是否第一次插入对象
-		$('.datas').empty();
-		for (var key in obj) {
-			obj[key].index = oIndexs[obj[key].type]++;
-			renderLi(obj[key], key)
-		}
-	}
-
-	//校验step2的value
-	function matchValue() {
-		if ($name.val() === '') {
-			alert('请填写视频名称')
-			return false;
-		};
-		if ($code.val() === '') {
-			alert('请填写视频代码')
-			return false;
-		};
-		return true;
-	}
-
-	//设置step2的value
-	function setValue(data) {
-		if (data) {
-			$name.val(data.name);
-			$code.val(data.code);
-			$type.eq(data.type - 1).prop('checked', true);
-		} else {
-			$name.val('');
-			$code.val('');
-			$type.eq(0).prop('checked', true);
-			$selector.val(0)
-		}
-	}
-
-
-	function updateData() { //更新一条li的数据
-		$checked = $('input[name="videoType"]:checked');
-		baseTree[listID][id] = {
-			name: $name.val(),
-			code: $code.val(),
-			type: $checked.val(),
-			index: baseTree[listID][id].index
-		};
-		_radio = baseTree[listID][id].type;
-		sortData(baseTree[listID][id])
-	}
-
-
-	//上下排序
-	function sortData(obj){
-		var curIndex = $selector.val();
-		if (curIndex == 1) { //上移
-			if (obj.index == 0) {
-				console.log('已经是第一个了')
-			} else {
-				//将自己-1、找到上条数据，将其index+1，
-				var prevID = findObj(baseTree[listID], obj.type, obj.index-1);
-				var temp = $.extend(true, {}, baseTree[listID][prevID]);
-				baseTree[listID][prevID] = obj;
-				baseTree[listID][id] = temp;
-			}
-		};
-		if (curIndex == 2) { //下移
-			if (obj.index >= oIndexs[obj.type] - 1) { //oIndexs[obj.type]每一组的最大数
-				console.log('已经是最后一个了')
-			}else{
-				//将自己-1、找到上条数据，将其index+1，
-				var nextID = findObj(baseTree[listID], obj.type, obj.index+1);
-				var temp = $.extend(true, {}, baseTree[listID][nextID]);
-				baseTree[listID][nextID] = obj;
-				baseTree[listID][id] = temp;
-			}
-		};
-	}
-
-	function findObj(objs, type, index) {
-		for (var key in objs) {
-			var obj = objs[key];
-			if (obj.type == type && obj.index == index) {
-				return key;
-			};
-		}
-	}
-	*/
-
-
 
 	/**
-	 * 下面所有代码只是为了展示最后的数据，实际应用可以去掉
+	 * 下面所有代码只是为了展示最后的数据，实际项目请忽略
 	 */
-
 	function showResult() {
 		$('#result').html(format(JSON.stringify(baseTree), false))
 	}

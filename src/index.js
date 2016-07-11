@@ -1,24 +1,36 @@
 $(function() {
 
 	var baseTree = {
-		'1000': {
-			1: [
-				{
-					id: 'a11111',
-					name: '111111',
-					code: '1'
-				},
-				{
-					id: 'b222222',
-					name: '222222222',
-					code: '2'
+		"1000": {
+			"1": [{
+					"name": "顶部1",
+					"code": "1",
+					"type": "1",
+					"id": "a11111"
 				}
 			],
-			2: [
-				{
-					id: 'c11111',
-					name: '33333333',
-					code: '1'
+			"2": [{
+					"name": "标题1",
+					"code": "1",
+					"type": "2",
+					"id": "undefined"
+				}, {
+					"name": "标题2",
+					"code": "2",
+					"type": "2",
+					"id": "undefined"
+				}
+			],
+			"3": [{
+					"name": "底部1",
+					"code": "1",
+					"type": "3",
+					"id": "c11111"
+				}, {
+					"name": "底部2",
+					"code": "2",
+					"type": "3",
+					"id": "b222222"
 				}
 			]
 		}
@@ -75,51 +87,21 @@ $(function() {
 				update();
 				render(baseTree[listID]);
 				this.close();
-				setValue(null);
 			}
 			return false;
 		},
 		cancel: function() {
 			this.close();
-			setValue(null);
 			return false;
+		},
+		onclose: function(){
+			setValue(null);
 		},
 		cancelDisplay: false,
 		content: document.getElementById('d2')
 	});
 
-
-	$('.btnAddVideo').on('click', function() {
-		listID = $(this).data('listid');
-		if ($.isEmptyObject(baseTree[listID])) {
-			baseTree[listID] = {};
-		}
-		render(baseTree[listID]);
-		d1.showModal();
-	});
-
-
-	//新增
-	$('#btnAddVideoList').on('click', function() {
-		$('.f-li-select').hide();
-		d2.showModal();
-	});
-
-
-	//编辑
-	$('.datas').on('click', '.edit', function() {
-		$('.f-li-select').show();
-		var $li = $(this).parent('li');
-		_type = $li.data('type');
-		_id = $li.data('id');
-		_index = $li.index();
-		setValue(baseTree[listID][_type][_index]);
-		d2.showModal();
-	});
-
-
-	function update(){
-
+	function update() {
 		var data = {
 			name: $name.val(),
 			code: $code.val(),
@@ -133,19 +115,45 @@ $(function() {
 		if (_index < 0) { //新增
 			// data.id = +new Date();
 			baseTree[listID][data.type].push(data);
-		}else{ //编辑
-			data.id = _id;
-			if (_type !== _radio) { //是否有更新radio
+			sort(baseTree[listID][data.type], baseTree[listID][data.type].length - 1)
+		} else { //编辑
+			// data.id = _id;
+			var lastIndex = ''; //被编辑的元素在更新数据后的位置
+			if (+_type !== +_radio) { //是否有更新radio
 				baseTree[listID][_type].splice(_index, 1);
 				baseTree[listID][_radio].push(data);
-			}else{
+				lastIndex = baseTree[listID][_radio].length - 1;
+			} else {
 				baseTree[listID][_radio][_index] = data;
+				lastIndex = _index;
 			}
-			_index = -1;
+			sort(baseTree[listID][_radio], lastIndex)
 		}
-
-
 	}
+
+	function sort(obj, index) { // obj = baseTree[listID][_radio]
+		var selectValue = $selector.val();
+		if (selectValue == 1) { //上移
+			if (index == 0) {
+				console.log('已经是第一个了')
+			} else {
+				swipe(obj, index, index - 1)
+			}
+		};
+		if (selectValue == 2) { //下移
+			if (index >= obj.length - 1) {
+				console.log('已经是最后一个了')
+			} else {
+				swipe(obj, index, index + 1)
+			}
+		};
+	}
+
+
+	function swipe(arr, index1, index2) {
+		arr[index1] = arr.splice(index2, 1, arr[index1])[0];
+		return arr;
+	};
 
 
 	function render(obj) { // obj = baseTree[listID]
@@ -168,7 +176,7 @@ $(function() {
 
 			if (arr.length) {
 				for (var i = 0; i < arr.length; i++) {
-					sLi += '<li data-id="' + arr[i].id + '" data-type="' + type + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>';
+					sLi += '<li data-type="' + type + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>';
 				};
 				$ul.append(sLi);
 				$area.appendTo($datas);
@@ -202,7 +210,8 @@ $(function() {
 			$name.val('');
 			$code.val('');
 			$type.eq(0).prop('checked', true);
-			$selector.val(0)
+			$selector.val(0);
+			_index = -1;
 		}
 	}
 
@@ -213,15 +222,52 @@ $(function() {
 			!(object.propertyIsEnumerable('length'));
 	}
 
-	function findIndex(arr, id){
-		var index = -1;
-		for (var i = 0; i < arr.length; i++) {
-			if (id === arr[i].id) {
-				index = i;
-			};
-		};
-		return index;
-	}
+	//添加视频
+	$('.btnAddVideo').on('click', function() {
+		listID = $(this).data('listid');
+		if ($.isEmptyObject(baseTree[listID])) {
+			baseTree[listID] = {};
+		}
+		render(baseTree[listID]);
+		d1.showModal();
+	});
+
+
+	//新增
+	$('#btnAddVideoList').on('click', function() {
+		d2.showModal();
+	});
+
+
+	//编辑
+	$('.datas').on('click', '.edit', function() {
+		var $li = $(this).parent('li');
+		_type = $li.data('type');
+		_id = $li.data('id');
+		_index = $li.index();
+		_radio = _type;
+		setValue(baseTree[listID][_type][_index]);
+		d2.showModal();
+	});
+
+
+	//删除
+	$('.datas').on('click', '.del', function() {
+		var $li = $(this).parent('li'),
+			type = $li.data('type'),
+			index = $li.index(),
+			name = $(this).siblings('.name').text();
+		dialog({
+			title: '警告',
+			width: 220,
+			content: '确认要删除<b>' + name + '</b>吗？',
+			ok: function() {
+				baseTree[listID][type].splice(index, 1);
+				render(baseTree[listID]);
+			}
+		}).showModal();
+	});
+
 
 	$('.f-radio').on('change', function() {
 		_radio = $(this).val();

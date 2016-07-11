@@ -57,7 +57,6 @@ $(function() {
 		okValue: '保存',
 		ok: function() {
 			this.close();
-			addSort();
 			showResult();
 			return false;
 		},
@@ -141,16 +140,6 @@ $(function() {
 		};
 	}
 
-	function addSort(){
-		for(var key in baseTree[listID]){
-			var arr = baseTree[listID][key];
-			for (var i = 0; i < arr.length; i++) {
-				arr[i].sort = i;
-			};
-		}
-	}
-
-
 	function render(obj) { // obj = baseTree[listID]
 		//reset
 		$datas.empty();
@@ -158,6 +147,8 @@ $(function() {
 		for (var key in obj) { // 1:{}, 2:{}, 3:{}
 			var arr = obj[key],
 				type = +key;
+
+
 
 			var $area, $ul, $h3, sLi = '';
 
@@ -171,6 +162,7 @@ $(function() {
 
 			if (arr.length) {
 				for (var i = 0; i < arr.length; i++) {
+					arr[i].sort = i;
 					arr[i].id = arr[i].id || '';
 					sLi += '<li data-type="' + type + '" data-id="'+ arr[i].id +'"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>';
 				};

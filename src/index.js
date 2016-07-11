@@ -1,5 +1,12 @@
+/**
+ * 专题系统后台添加视频入口
+ * @return {[object]} baseTree
+ * baseTree['1000'] {[object]} 第一个添加视频按钮数据
+ * baseTree['1000']['1'] ['2'] ['3'] {[array]}  依次为'分类顶部','标题下方','分类底部' 数组内每个对象为每一条数据
+ */
 $(function() {
 
+	//假数据 调试使用
 	var baseTree = {
 		"1000": {
 			"1": [{
@@ -40,13 +47,12 @@ $(function() {
 		$datas = $('.datas'),
 		$typeTitle = $('.typeTittle');
 
-	var	_id,
-		_index = -1,
-		_type = 1,
-		_radio = 1,
-		listID,
-		max = $type.length,
-		flags = {};
+	var	_id,			//每条数据的唯一标识
+		_index = -1,	//每条数据在当前数组内的索引值
+		_type = 1,		//每条数据所属分类
+		_radio = 1,		//当前单选值
+		listID,			//baseTree['1000']的'1000' 值来自<添加视频1>
+		flags = {};		//用于标识是否第一个插入 是：插入h3元素 否：只插入li元素
 
 	//弹层1
 	var d1 = dialog({
@@ -68,6 +74,7 @@ $(function() {
 		content: document.getElementById('d1')
 	});
 
+	//弹层2
 	var d2 = dialog({
 		id: 'd2',
 		title: '添加视频 step2',
@@ -91,38 +98,42 @@ $(function() {
 		content: document.getElementById('d2')
 	});
 
+	//更新baseTree的数据
 	function update() {
+		//获取弹层d2的实际数据
 		var data = {
 			name: $name.val(),
 			code: $code.val(),
 			type: $('input[name="videoType"]:checked').val()
 		};
 
-		var obj = baseTree[listID];
+		var obj = baseTree[listID],
+			idx = -1;	//被编辑的元素在更新数据后分类内的位置
 
 		if (_index < 0) { //新增
-			if (!isArray(obj[data.type])) {
+			if (!isArray(obj[data.type])) { //初始化一个数组
 				obj[data.type] = [];
 			};
 			data.id = 'id_' + (+new Date()); //和下面的一起放开使用
 			obj[data.type].push(data);
-			sort(obj[data.type], obj[data.type].length - 1)
+			idx = obj[data.type].length - 1; //新增的数据一定插到最后位置
+			sort(obj[data.type], idx)
 		} else { //编辑
 			data.id = _id; //需定义
-			var lastIndex = ''; //被编辑的元素在更新数据后的位置
-			if (+_type !== +_radio) { //是否有更新radio
-				obj[_type].splice(_index, 1);
-				obj[_radio].push(data);
-				lastIndex = obj[_radio].length - 1;
-			} else {
+			if (+_type !== +_radio) { //重新选择了radio 表示元素会被插入其他分类
+				obj[_type].splice(_index, 1); //删除原分类的数据
+				obj[_radio].push(data); //将数据插入选定radio的分类中
+				idx = obj[_radio].length - 1;
+			} else { //未重新选择radio 只刷新数据即可
 				obj[_radio][_index] = data;
-				lastIndex = _index;
+				idx = _index;
 			}
-			sort(obj[_radio], lastIndex)
+			sort(obj[_radio], idx)
 		}
 	}
 
-	function sort(obj, index) { // obj = baseTree[listID][_radio]
+	//上移下移排序
+	function sort(obj, index) { // obj = baseTree[listID][_radio]   index = 当前元素在目标分类内的索引值
 		var selectValue = $selector.val();
 		if (selectValue == 1) { //上移
 			if (index == 0) {
@@ -141,18 +152,16 @@ $(function() {
 	}
 
 	function render(obj) { // obj = baseTree[listID]
-		//reset
+		//渲染前清空dom元素及标识
 		$datas.empty();
 		flags = {};
-		for (var key in obj) { // 1:{}, 2:{}, 3:{}
+		for (var key in obj) { // obj = { '1':[], '2':[], '3':[] }
 			var arr = obj[key],
 				type = +key;
 
+			var $area, $ul, $h3, sLi = ''; // dom
 
-
-			var $area, $ul, $h3, sLi = '';
-
-			if (!flags[type]) { //说明是第一次插入
+			if (!flags[type]) { //第一次渲染 添加标题
 				$area = $('<div class="area area' + type + '">'),
 				$ul = $('<ul>').appendTo($area),
 				$h3 = $('<h3>' + $typeTitle.eq(type - 1).data('name') + '</h3>').prependTo($area);
@@ -168,10 +177,9 @@ $(function() {
 				};
 				$ul.append(sLi);
 				$area.appendTo($datas);
-			}else{ //空数组时删除这个对象
+			}else{ //删除空数组
 				delete obj[key];
 			}
-
 		}
 	}
 
@@ -203,6 +211,7 @@ $(function() {
 		}
 	}
 
+	//数组中元素位置对换
 	function swipe(arr, index1, index2) {
 		arr[index1] = arr.splice(index2, 1, arr[index1])[0];
 		return arr;

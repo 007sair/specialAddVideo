@@ -34,7 +34,10 @@ $(function() {
 		$datas = $('.datas'),
 		$typeTitle = $('.typeTittle');
 
-	var	iRadio = 1,
+	var	_id,
+		_index = -1,
+		_type,
+		_radio = 1,
 		listID,
 		max = $type.length;
 
@@ -106,26 +109,44 @@ $(function() {
 	//编辑
 	$('.datas').on('click', '.edit', function() {
 		$('.f-li-select').show();
-		var $li = $(this).parent('li'),
-			index = $li.index(),
-			type = $li.data('type');
-		setValue(baseTree[listID][type][index]);
+		var $li = $(this).parent('li');
+		_type = $li.data('type');
+		_id = $li.data('id');
+		_index = $li.index();
+		setValue(baseTree[listID][_type][_index]);
 		d2.showModal();
 	});
 
 
 	function update(){
+
 		var data = {
-			id: +new Date(),
 			name: $name.val(),
 			code: $code.val(),
 			type: $('input[name="videoType"]:checked').val()
 		};
+
 		if (!isArray(baseTree[listID][data.type])) {
 			baseTree[listID][data.type] = [];
 		};
-		baseTree[listID][data.type].push(data);
+
+		if (_index < 0) { //新增
+			// data.id = +new Date();
+			baseTree[listID][data.type].push(data);
+		}else{ //编辑
+			data.id = _id;
+			if (_type !== _radio) { //是否有更新radio
+				baseTree[listID][_type].splice(_index, 1);
+				baseTree[listID][_radio].push(data);
+			}else{
+				baseTree[listID][_radio][_index] = data;
+			}
+			_index = -1;
+		}
+
+
 	}
+
 
 	function render(obj) { // obj = baseTree[listID]
 		//reset
@@ -138,7 +159,7 @@ $(function() {
 			var $area, $ul, $h3, sLi = '';
 
 			if (!flags[type]) { //说明是第一次插入
-				$area = $('<div class="area area' + type + '">').appendTo($datas),
+				$area = $('<div class="area area' + type + '">'),
 				$ul = $('<ul>').appendTo($area),
 				$h3 = $('<h3>' + $typeTitle.eq(type - 1).data('name') + '</h3>').prependTo($area);
 
@@ -147,9 +168,10 @@ $(function() {
 
 			if (arr.length) {
 				for (var i = 0; i < arr.length; i++) {
-					sLi += '<li data-id="' + arr[i].id + '" data-type="'+ type +'"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>'; 
+					sLi += '<li data-id="' + arr[i].id + '" data-type="' + type + '"><input type="button" class="del" value="删除" /><input type="button" class="edit" value="编辑" /><span title="' + arr[i].name + '" class="name">' + arr[i].name + '</span></li>';
 				};
 				$ul.append(sLi);
+				$area.appendTo($datas);
 			}
 
 		}
@@ -175,7 +197,7 @@ $(function() {
 		if (data) {
 			$name.val(data.name);
 			$code.val(data.code);
-			$type.eq(data.type - 1).prop('checked', true);
+			$type.eq(_type - 1).prop('checked', true);
 		} else {
 			$name.val('');
 			$code.val('');
@@ -190,6 +212,20 @@ $(function() {
 			typeof object.splice === 'function' &&
 			!(object.propertyIsEnumerable('length'));
 	}
+
+	function findIndex(arr, id){
+		var index = -1;
+		for (var i = 0; i < arr.length; i++) {
+			if (id === arr[i].id) {
+				index = i;
+			};
+		};
+		return index;
+	}
+
+	$('.f-radio').on('change', function() {
+		_radio = $(this).val();
+	});
 
 
 	/*
@@ -240,7 +276,7 @@ $(function() {
 
 
 	$('input[name="videoType"]').on('change', function() {
-		iRadio = $(this).val();
+		_radio = $(this).val();
 	});
 
 
@@ -309,7 +345,7 @@ $(function() {
 			type: $checked.val(),
 			index: baseTree[listID][id].index
 		};
-		iRadio = baseTree[listID][id].type;
+		_radio = baseTree[listID][id].type;
 		sortData(baseTree[listID][id])
 	}
 

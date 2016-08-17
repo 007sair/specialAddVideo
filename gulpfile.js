@@ -98,7 +98,7 @@
 		//监听文件变化并执行sass任务
 		gulp.watch(paths.sass + '**/*.scss', ['sass']);
 
-		gulp.watch(paths.src + '**/*.js', ['script']);
+		// gulp.watch(paths.src + '**/*.js', ['script']);
 
 		//监听html发生变化时手动重载浏览器
 		gulp.watch("*.html").on("change", browserSync.reload);

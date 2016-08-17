@@ -13,7 +13,7 @@ li{list-style:none}
 .datas{margin-top:5px;height:380px;overflow-y:auto}
 .datas li{margin-bottom:5px;padding:5px;border:1px solid #000}
 .datas li .name{display:inline-block;vertical-align:middle;*display:inline;*zoom:1;line-height:28px;width:170px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
-.datas li input{float:right;margin-left:5px;padding:4px 8px}
+.datas li input{float:right;margin-left:5px;padding:4px 8px;width:auto}
 .v-ui-dialog{*zoom:1;_float:left;position:relative;background-color:#FFF;border:1px solid #999;border-radius:6px;outline:0;background-clip:padding-box;font-family:Helvetica,arial,sans-serif;font-size:14px;line-height:1.428571429;color:#333;opacity:0;-webkit-transform:scale(0);-moz-transform:scale(0);-ms-transform:scale(0);transform:scale(0);-webkit-transition:-webkit-transform .15s ease-in-out,opacity .15s ease-in-out;-webkit-transition:opacity .15s ease-in-out,-webkit-transform .15s ease-in-out;transition:opacity .15s ease-in-out,-webkit-transform .15s ease-in-out;-moz-transition:transform .15s ease-in-out,opacity .15s ease-in-out,-moz-transform .15s ease-in-out;transition:transform .15s ease-in-out,opacity .15s ease-in-out;transition:transform .15s ease-in-out,opacity .15s ease-in-out,-webkit-transform .15s ease-in-out,-moz-transform .15s ease-in-out}
 .v-ui-popup-show .v-ui-dialog{opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1)}
 .v-ui-popup-focus .v-ui-dialog{-webkit-box-shadow:0 0 8px rgba(0,0,0,.1);box-shadow:0 0 8px rgba(0,0,0,.1)}

@@ -7,36 +7,38 @@
 $(function() {
 
 	//假数据 调试使用
-	var baseTree = {
-		"1000": {
-			"1": [{
-					"name": "顶部1",
-					"code": "1",
-					"type": "1"
-				}
-			],
-			"2": [{
-					"name": "标题1",
-					"code": "1",
-					"type": "2"
-				}, {
-					"name": "标题2",
-					"code": "2",
-					"type": "2"
-				}
-			],
-			"3": [{
-					"name": "底部1",
-					"code": "1",
-					"type": "3"
-				}, {
-					"name": "底部2",
-					"code": "2",
-					"type": "3"
-				}
-			]
-		}
-	};
+	// var baseTree = {
+	// 	"1000": {
+	// 		"1": [{
+	// 				"name": "顶部1",
+	// 				"code": "1",
+	// 				"type": "1"
+	// 			}
+	// 		],
+	// 		"2": [{
+	// 				"name": "标题1",
+	// 				"code": "1",
+	// 				"type": "2"
+	// 			}, {
+	// 				"name": "标题2",
+	// 				"code": "2",
+	// 				"type": "2"
+	// 			}
+	// 		],
+	// 		"3": [{
+	// 				"name": "底部1",
+	// 				"code": "1",
+	// 				"type": "3"
+	// 			}, {
+	// 				"name": "底部2",
+	// 				"code": "2",
+	// 				"type": "3"
+	// 			}
+	// 		]
+	// 	}
+	// };
+
+	var baseTree = {};
 
 	//dom var
 	var $context = $('#d2'),
@@ -122,6 +124,9 @@ $(function() {
 			data.id = _id; //需定义
 			if (+_type !== +_radio) { //重新选择了radio 表示元素会被插入其他分类
 				obj[_type].splice(_index, 1); //删除原分类的数据
+				if (!isArray(obj[_radio])) { //初始化一个数组
+					obj[_radio] = [];
+				};
 				obj[_radio].push(data); //将数据插入选定radio的分类中
 				idx = obj[_radio].length - 1;
 			} else { //未重新选择radio 只刷新数据即可
@@ -131,6 +136,7 @@ $(function() {
 			sort(obj[_radio], idx)
 		}
 	}
+
 
 	//上移下移排序
 	function sort(obj, index) { // obj = baseTree[listID][_radio]   index = 当前元素在目标分类内的索引值
@@ -178,7 +184,7 @@ $(function() {
 				$ul.append(sLi);
 				$area.appendTo($datas);
 			}else{ //删除空数组
-				delete obj[key];
+				delete obj[key]; //删除后，需给空分类对象插入数据时初始一个空数组 否则会报错
 			}
 		}
 	}
